@@ -12,6 +12,8 @@ package suffixtree.construction;
 public class SuffixTree {
 	  static String alphabet = "abcdefghijklmnopqrstuvwxyz1234567890\1\2";
 	  static int alphabetSize = alphabet.length();
+	  
+	  static int nodes = 0; // counting the nodes in the suffix tree ***
 
 	  static class Node {
 	    int depth; // from start of suffix
@@ -42,6 +44,7 @@ public class SuffixTree {
 	    }
 	    Node root = new Node(0, 0, 0, null);
 	    Node cn = root;
+	    nodes=0;nodes++; //counting nodes (reverse counter, if we build a new tree) ***
 	    // root.suffixLink must be null, but that way it gets more convenient
 	    // processing
 	    root.suffixLink = root;
@@ -69,6 +72,7 @@ public class SuffixTree {
 	          if (cn.children[cur] == null) {
 	            // no extension - add leaf
 	            cn.children[cur] = new Node(i + 1, n, curDepth, cn);
+	            nodes++; // counting nodes ***
 	            lastRule = 2;
 	          } else {
 	            cn = cn.children[cur];
@@ -79,7 +83,9 @@ public class SuffixTree {
 	          int end = cn.begin + curDepth - cn.depth;
 	          if (a[end] != cur) { // split implicit node here
 	            Node newn = new Node(cn.begin, end, cn.depth, cn.parent);
+	            nodes++; // counting nodes ***
 	            newn.children[cur] = new Node(i + 1, n, curDepth, newn);
+	            nodes++; // counting nodes ***
 	            newn.children[a[end]] = cn;
 	            cn.parent.children[a[cn.begin]] = newn;
 	            if (needsSuffixLink != null) {
@@ -132,7 +138,7 @@ public class SuffixTree {
 	  }
 
 	  // Usage example
-	  public static void main(String[] args) {
+	  public static void main2(String[] args) {
 	    String s1 = "12345";
 	    String s2 = "124234";
 	    // build generalized suffix tree (see Gusfield, p.125)
@@ -144,5 +150,12 @@ public class SuffixTree {
 	    findLCS(root, s1.length(), s1.length() + s2.length() + 1);
 	    System.out.println(3 == lcsLength);
 	    System.out.println(s.substring(lcsBeginIndex - 1, lcsBeginIndex + lcsLength - 1));
+	  }
+	  
+	  // Test the count of nodes ***
+	  public static void main(String[] args){
+		  String s = "ananas\1";
+		  Node root = buildSuffixTree(s);
+		  System.out.println("Node count: " + nodes);
 	  }
 	}
