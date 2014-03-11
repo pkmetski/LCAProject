@@ -9,7 +9,7 @@ public class Main2 {
 		String s = "ananas\1";
 		Node root = SuffixTree.buildSuffixTree(s);
 
-		EulerTourController et = new EulerTourController(7);
+		EulerTourController et = new EulerTourController(root.nodes);
 		et.process(root);
 
 		RMQController rmq = new RMQController();

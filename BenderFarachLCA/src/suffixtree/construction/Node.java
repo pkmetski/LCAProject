@@ -1,6 +1,6 @@
 package suffixtree.construction;
 
-import java.util.Arrays;
+//import java.util.Arrays;
 
 import Model.INode;
 import suffixtree.construction.Node;
@@ -8,6 +8,8 @@ import suffixtree.construction.Node;
 public class Node implements INode{
 	String alphabet = "abcdefghijklmnopqrstuvwxyz1234567890\1\2";
 	int alphabetSize = alphabet.length();
+	
+	public int nodes;
 	
 	int depth; // from start of suffix
 	int begin;

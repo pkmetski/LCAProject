@@ -14,8 +14,6 @@ public class SuffixTree {
 	static String alphabet = "abcdefghijklmnopqrstuvwxyz1234567890\1\2";
 	static int alphabetSize = alphabet.length();
 
-	static int nodes = 0; // counting the nodes in the suffix tree ***
-
 //	static class Node {
 //		int depth; // from start of suffix
 //		int begin;
@@ -45,8 +43,8 @@ public class SuffixTree {
 		}
 		Node root = new Node(0, 0, 0, null);
 		Node cn = root;
-		nodes = 0;
-		nodes++; // counting nodes (reverse counter, if we build a new tree) ***
+		root.nodes = 0;
+		root.nodes++; // counting nodes (reverse counter, if we build a new tree) ***
 		// root.suffixLink must be null, but that way it gets more convenient
 		// processing
 		root.suffixLink = root;
@@ -75,7 +73,7 @@ public class SuffixTree {
 					if (cn.children[cur] == null) {
 						// no extension - add leaf
 						cn.children[cur] = new Node(i + 1, n, curDepth, cn);
-						nodes++; // counting nodes ***
+						root.nodes++; // counting nodes ***
 						lastRule = 2;
 					} else {
 						cn = cn.children[cur];
@@ -86,9 +84,9 @@ public class SuffixTree {
 					int end = cn.begin + curDepth - cn.depth;
 					if (a[end] != cur) { // split implicit node here
 						Node newn = new Node(cn.begin, end, cn.depth, cn.parent);
-						nodes++; // counting nodes ***
+						root.nodes++; // counting nodes ***
 						newn.children[cur] = new Node(i + 1, n, curDepth, newn);
-						nodes++; // counting nodes ***
+						root.nodes++; // counting nodes ***
 						newn.children[a[end]] = cn;
 						cn.parent.children[a[cn.begin]] = newn;
 						if (needsSuffixLink != null) {
@@ -160,6 +158,6 @@ public class SuffixTree {
 	public static void main(String[] args) {
 		String s = "ananas\1";
 		Node root = buildSuffixTree(s);
-		System.out.println("Node count: " + nodes);
+		System.out.println("Node count: " + root.nodes);
 	}
 }
