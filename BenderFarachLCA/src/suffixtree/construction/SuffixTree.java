@@ -16,26 +16,26 @@ public class SuffixTree {
 
 	static int nodes = 0; // counting the nodes in the suffix tree ***
 
-	static class Node {
-		int depth; // from start of suffix
-		int begin;
-		int end;
-		Node[] children;
-		Node parent;
-		Node suffixLink;
-
-		Node(int begin, int end, int depth, Node parent) {
-			children = new Node[alphabetSize];
-			this.begin = begin;
-			this.end = end;
-			this.parent = parent;
-			this.depth = depth;
-		}
-
-		boolean contains(int d) {
-			return depth <= d && d < depth + (end - begin);
-		}
-	}
+//	static class Node {
+//		int depth; // from start of suffix
+//		int begin;
+//		int end;
+//		Node[] children;
+//		Node parent;
+//		Node suffixLink;
+//
+//		Node(int begin, int end, int depth, Node parent) {
+//			children = new Node[alphabetSize];
+//			this.begin = begin;
+//			this.end = end;
+//			this.parent = parent;
+//			this.depth = depth;
+//		}
+//
+//		boolean contains(int d) {
+//			return depth <= d && d < depth + (end - begin);
+//		}
+//	}
 
 	public static Node buildSuffixTree(String s) {
 		int n = s.length();
