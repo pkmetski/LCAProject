@@ -22,10 +22,8 @@ public class EulerTourController {
 		this.R = new HashMap<INode, Integer>(n);
 	}
 
-	public void tour(INode root) {
+	public void process(INode root) {
 		eulerTour(root);
-		int i = 0;
-		i++;
 	}
 
 	private void eulerTour(INode parent) {
@@ -41,5 +39,17 @@ public class EulerTourController {
 			L[++nodeIndex] = --level;
 			E[nodeIndex] = parent;
 		}
+	}
+
+	public Map<INode, Integer> getR() {
+		return R;
+	}
+
+	public INode[] getE() {
+		return E;
+	}
+
+	public int[] getL() {
+		return L;
 	}
 }

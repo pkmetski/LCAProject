@@ -21,10 +21,4 @@ public class Node implements INode {
 	public void addChild(INode child) {
 		children.add(child);
 	}
-
-	@Override
-	public String getLabel() {
-		return this.label;
-	}
-
 }
