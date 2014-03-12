@@ -41,7 +41,8 @@ public class SuffixTree {
 		for (int i = 0; i < n; i++) {
 			a[i] = (byte) alphabet.indexOf(s.charAt(i));
 		}
-		Node root = new Node(0, 0, 0, null);
+		int ci = 0; // identifying nodes (current id counter) **
+		Node root = new Node(ci, 0, 0, 0, null);
 		Node cn = root;
 		root.nodes = 0;
 		root.nodes++; // counting nodes (reverse counter, if we build a new tree) ***
@@ -57,8 +58,7 @@ public class SuffixTree {
 			for (; j <= i + 1; j++) {
 				int curDepth = i + 1 - j;
 				if (lastRule != 3) {
-					cn = cn.suffixLink != null ? cn.suffixLink
-							: cn.parent.suffixLink;
+					cn = cn.suffixLink != null ? cn.suffixLink : cn.parent.suffixLink;
 					int k = j + cn.depth;
 					while (curDepth > 0 && !cn.contains(curDepth - 1)) {
 						k += cn.end - cn.begin;
@@ -72,7 +72,8 @@ public class SuffixTree {
 					}
 					if (cn.children[cur] == null) {
 						// no extension - add leaf
-						cn.children[cur] = new Node(i + 1, n, curDepth, cn);
+						ci++; // identifying nodes **
+						cn.children[cur] = new Node(ci, i + 1, n, curDepth, cn);
 						root.nodes++; // counting nodes ***
 						lastRule = 2;
 					} else {
@@ -83,9 +84,11 @@ public class SuffixTree {
 				} else { // implicit node
 					int end = cn.begin + curDepth - cn.depth;
 					if (a[end] != cur) { // split implicit node here
-						Node newn = new Node(cn.begin, end, cn.depth, cn.parent);
+						ci++; // identifying nodes **
+						Node newn = new Node(ci, cn.begin, end, cn.depth, cn.parent);
 						root.nodes++; // counting nodes ***
-						newn.children[cur] = new Node(i + 1, n, curDepth, newn);
+						ci++; // identifying nodes **
+						newn.children[cur] = new Node(ci, i + 1, n, curDepth, newn);
 						root.nodes++; // counting nodes ***
 						newn.children[a[end]] = cn;
 						cn.parent.children[a[cn.begin]] = newn;
@@ -159,5 +162,6 @@ public class SuffixTree {
 		String s = "ananas\1";
 		Node root = buildSuffixTree(s);
 		System.out.println("Node count: " + root.nodes);
+		root.PrintPretty("", true);
 	}
 }
