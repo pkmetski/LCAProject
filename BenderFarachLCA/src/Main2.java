@@ -1,4 +1,6 @@
-import Logic2.EulerTourController;
+import java.util.Arrays;
+
+import Logic2.EulerTourReduction;
 import Logic2.RMQController;
 import suffixtree.construction.SuffixTree;
 import suffixtree.construction.Node;
@@ -9,13 +11,21 @@ public class Main2 {
 		String s = "ananas\1";
 		Node root = SuffixTree.buildSuffixTree(s);
 
-		EulerTourController et = new EulerTourController(root.nodes);
-		et.process(root);
-
-		RMQController rmq = new RMQController();
-		rmq.process(et.getR(), et.getL(), et.getE());
+		EulerTourReduction et = new EulerTourReduction(root.nodes);
+		et.euler_tour(root);
 		
-//		rmq.RMQ(u, v)
+		// check whether all edges were added correctly
+		printArray(et.edge_list);
+
+	}
+	
+	/*
+	 * Check matrix filled correctly
+	 * http://stackoverflow.com/questions/17118664/printing-a-two-dimensional-matrix-array-java
+	 */
+	public static void printArray(int matrix[][]) {
+	    for (int[] row : matrix) 
+	        System.out.println(Arrays.toString(row));
 	}
 
 }
