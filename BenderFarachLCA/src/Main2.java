@@ -20,25 +20,40 @@ public class Main2 {
 		root.PrintPretty("", true);
 		
 		// separate the tree and the list checks
-		System.out.println();
+		//System.out.println();
 		
 		// check whether all edges were added correctly
-		printArray(et.edge_list);
+		//printArray(et.edge_list);
 		
 		// separate the tree and the list checks
-		System.out.println();
+		//System.out.println();
 		
 		// check adjacency lists (next)
-		et.checkAdjacency(); // if step4 not performed
+		//et.checkAdjacency(); // if step4 not performed
+		
+		// separate the tree and the list checks
+		//System.out.println();
+		
+		// check mapping (first)
+		//et.checkMapping();
 		
 		// separate the tree and the list checks
 		System.out.println();
-		
-		// check mapping (first)
-		et.checkMapping();
 		
 		// check tour of nodes visited (E)
 		et.checkE();
+		
+		// separate the tree and the list checks
+		System.out.println();
+		
+		// check tour of node levels (L)
+		et.checkL();
+		
+		// separate the tree and the list checks
+		System.out.println();
+		
+		// check tour of node levels (R)
+		et.checkR();
 		
 		// ...................................................................
 

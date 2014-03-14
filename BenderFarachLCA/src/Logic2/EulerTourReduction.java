@@ -1,7 +1,6 @@
 package Logic2;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import suffixtree.construction.Node;
 
@@ -151,8 +150,11 @@ public class EulerTourReduction {
 	private void step4(){
 		// instead of making a list of edges 'succ' use node visiting instead (E[i])
 		int i = 0; //pointer to the E[i] currently overwriting... tour will be finished when all of E is populated
+		int lvl = 0;
 		int cn = next[0].getAdjacents().get(0)[0];//current node starts from the first node from the first edge from the first adjacency list (root node)
 		E[i] = cn; //add root node
+		L[i] = lvl;
+		R[i] = cn;
 		i++;
 		
 		int ni; //next index
@@ -161,11 +163,17 @@ public class EulerTourReduction {
 				ni = next[cn].next;
 				next[cn].next++;
 				cn = next[cn].getAdjacents().get(ni)[1]; //always remove the first of the adjacent edges... i.e. the next one
+				lvl++;
+				if(cn!=0 && R[cn]==0){
+					R[cn] = i;
+				}
 			}
 			else{ //backtrack to parent -> follow mapping
 				cn = first[cn];
+				lvl--;
 			}
 			E[i] = cn;
+			L[i] = lvl;
 		}
 	}
 	
@@ -196,7 +204,17 @@ public class EulerTourReduction {
 		for(int i=0; i<E.length; i++)
 			System.out.print(""+E[i]+",");
 	}
+	
+	public void checkL(){
+		for(int i=0; i<L.length; i++)
+			System.out.print(""+L[i]+",");
+	}
 
+	public void checkR(){
+		for(int i=0; i<R.length; i++)
+			System.out.print(""+R[i]+",");
+	}
+	
 	public int[] getR() {
 		return R;
 	}
