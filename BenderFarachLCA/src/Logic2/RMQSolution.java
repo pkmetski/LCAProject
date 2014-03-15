@@ -16,6 +16,7 @@ public class RMQSolution {
 	private int[] l;
 	private int[] r;
 	private int[][] st;
+	private int a; // node id of the answer
 
 	// RMQ using sparse tree
 	public RMQSolution(int[] e, int[] l, int[] r){
@@ -24,9 +25,13 @@ public class RMQSolution {
 		this.r = r;
 	}
 	
-	public void solveA(int u, int v){
+	/*
+	 * select i and j based on their first occurrence (from r)
+	 */
+	public int solveA(int u, int v){
 		stepA1();
-		stepA2();
+		stepA2(r[u],r[v]);
+		return a;
 	}
 	
 	/*
@@ -60,8 +65,20 @@ public class RMQSolution {
 	        System.out.println(Arrays.toString(row));
 	}
 	
-	private void stepA2(){
+	/*
+	 * select 2 overlapping blocks that cover the subrange entirely
+	 * 
+	 * 
+	 */
+	private void stepA2(int u, int v){
+		// if it happens that we have i = j, return e[i] so that log 0 does not occur
+		if(u == v){a = e[u]; return;}
 		
+		int i = (u < v)? u : v;
+		int j = (u > v)? u : v;
+		int k = (int) Math.round(Math.log(j-i) / Math.log(2));
+		
+		a = Math.min(l[st[i][k]], l[st[j-(2 << k)+1][k]]);
 	}
 	
 	public void solveB(int u, int v){

@@ -15,7 +15,7 @@ public class Main2 {
 		et.euler_tour(root);
 		
 		RMQSolution rmq = new RMQSolution(et.getE(),et.getL(),et.getR());
-		rmq.solveA(0, 0);
+		int answer = rmq.solveA(4, 5);
 		
 		// checks - to be deleted later.......................................
 		// check tree node ordering
@@ -62,6 +62,12 @@ public class Main2 {
 		
 		// check sparse tree (st)
 		rmq.checkSparseTree();
+		
+		// separate the tree and the list checks
+		System.out.println();
+		
+		// check answer
+		System.out.println(answer);
 		
 		// ...................................................................
 
