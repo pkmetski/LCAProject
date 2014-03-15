@@ -1,7 +1,7 @@
 import java.util.Arrays;
 
 import Logic2.EulerTourReduction;
-import Logic2.RMQController;
+import Logic2.RMQSolution;
 import suffixtree.construction.SuffixTree;
 import suffixtree.construction.Node;
 
@@ -14,6 +14,8 @@ public class Main2 {
 		EulerTourReduction et = new EulerTourReduction(root.nodes);
 		et.euler_tour(root);
 		
+		RMQSolution rmq = new RMQSolution(et.getE(),et.getL(),et.getR());
+		rmq.solveA(0, 0);
 		
 		// checks - to be deleted later.......................................
 		// check tree node ordering
@@ -54,6 +56,12 @@ public class Main2 {
 		
 		// check tour of node levels (R)
 		et.checkR();
+		
+		// separate the tree and the list checks
+		System.out.println();
+		
+		// check sparse tree (st)
+		rmq.checkSparseTree();
 		
 		// ...................................................................
 

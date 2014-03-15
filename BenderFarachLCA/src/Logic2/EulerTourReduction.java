@@ -22,8 +22,6 @@ public class EulerTourReduction {
 	private int[] E;
 	private int[] L;
 	private int[] R;
-	private int nodeIndex = -1;
-	private int level = -1;
 	
 	/*
 	 * The list has the form of a matrix of size [2E][2],
