@@ -16,7 +16,7 @@ public class Main2 {
 		et.euler_tour_plamen_jesper(root);
 		
 		RMQSolution rmq = new RMQSolution(et.getE(),et.getL(),et.getR());
-		int answer = rmq.solveA(4, 8);
+//		int answer = rmq.solveA(4, 8);
 		
 		// checks - to be deleted later.......................................
 		// check tree node ordering
@@ -57,8 +57,14 @@ public class Main2 {
 		//rmq.checkSparseTree();
 		
 		// check answer
+//		System.out.println();
+//		System.out.println(answer);
+		
+		// check partitioning
 		System.out.println();
-		System.out.println(answer);
+		rmq.solveB(4, 8);
+		rmq.checkPartition();
+		rmq.checkHashMap();
 		
 		// ...................................................................
 

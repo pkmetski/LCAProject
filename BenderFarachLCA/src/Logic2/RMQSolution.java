@@ -1,23 +1,22 @@
 package Logic2;
 
 import java.util.Arrays;
-import java.util.Map;
-
-import suffixtree.construction.Node;
+import java.util.HashMap;
 
 public class RMQSolution {
 
-	private Map<Node, Integer> R;
-	private int[][] M;
-	private int[] L;
-	private Node[] E;
-	
 	private int[] e;
 	private int[] l;
 	private int[] r;
-	private int[][] st;
+	private int[][] st; // sparse table
 	private int a; // node id of the answer
-
+	
+	private int bs; 		// block size (logN/2)
+	private int[] val; 		// values for min element in blocks of size logN/2 -> resembles A'
+	private int[] pos; 		// positions for min element in blocks of size logN/2 -> resembles B
+	private String[] nb; 	// normalized block reference for each block
+	private HashMap<String,String> patterns = new HashMap<String,String>(); //unique normalized blocks and their O(n^2) table
+	
 	// RMQ using sparse tree
 	public RMQSolution(int[] e, int[] l, int[] r){
 		this.e = e;
@@ -67,8 +66,6 @@ public class RMQSolution {
 	
 	/*
 	 * select 2 overlapping blocks that cover the subrange entirely
-	 * 
-	 * 
 	 */
 	private void stepA2(int u, int v){
 		// if it happens that we have i = j, return e[i] so that log 0 does not occur
@@ -86,54 +83,89 @@ public class RMQSolution {
 		stepB2();
 	}
 	
+	/*
+	 * Partition A into blocks of size (log n) / 2
+	 * 
+	 * determine block size
+	 * define arrays for the value and position of the minimum element in a block
+	 * define an array of the same size to reference normalized blocks
+	 * i*bs maps val[i] to l-block
+	 */
 	private void stepB1(){
+		double lgN = Math.round((Math.log(l.length) / Math.log(2)));
+		bs = (int) (lgN / 2); // block size
 		
+		int vps = (int) Math.round(2*l.length / lgN);// val(A') and pos(B) size
+		val = new int[vps]; 		// val(A')
+		pos = new int[vps]; 		// pos(B )
+		nb = new String[vps]; 	// normalized block reference
+		StringBuilder vector = new StringBuilder();// vector pattern
+		
+		int cb = 0; 					// keeps track of current block
+		int minV = l[0];			 	// keeps track of minimal value
+		int minP = 0; 					// keeps track of minimal position
+		
+		for(int i = 1; i < l.length; i++){
+			// determine the start of a new block - finish previous and reset values
+			if(i % bs == 0){
+				// save unique vector patterns and start a new one
+				nb[cb] = vector.toString();
+				if(!patterns.containsKey(vector)) patterns.put(nb[cb], "table");
+				vector = new StringBuilder(); //start new
+				
+				val[cb]=minV;
+				pos[cb]=minP;
+				cb++;
+				minV = Integer.MAX_VALUE;
+			}
+			else{
+				// continue vector pattern
+				vector.append(l[i-1] - l[i]);
+			}
+			
+			// keep track of min value and its position
+			if(l[i] < minV){
+				minV = l[i];
+				minP = i;
+			}
+			// add the remaining elements of the array in a separate block of a smaller size
+			if(i == l.length-1){
+				// save vector pattern
+				if(i % bs -1 > 0){//avoid a pattern of size 0
+					nb[cb] = vector.toString();
+					if(!patterns.containsKey(vector)) patterns.put(nb[cb], "table");
+				}
+				
+				val[cb]=minV;
+				pos[cb]=minP;
+			}
+		}
+	}
+	
+	/*
+	 * Check partitioning done correctly
+	 */
+	public void checkPartition(){
+		System.out.println();
+		System.out.println(Arrays.toString(val));
+		System.out.println(Arrays.toString(pos));
+	}
+	
+	/*
+	 * Check HashMap
+	 * http://stackoverflow.com/questions/5920135/printing-hashmap-in-java
+	 */
+	public void checkHashMap(){
+		System.out.println();
+		for (String name: patterns.keySet()){
+			String key =name;
+			String value = patterns.get(name);
+			System.out.println(key + " " + value);
+		}
 	}
 	
 	private void stepB2(){
 		
 	}
 	
-	public void process(Map<Node, Integer> R, int[] L, Node[] E) {
-		int i, j;
-		this.R = R;
-		this.L = L;
-		this.E = E;
-		this.M = new int[R.size()][(int) Math.round((Math
-				.log(R.keySet().size()) / Math.log(2))) + 1];
-
-		// initialize M for the intervals with length 1
-		for (i = 0; i < R.keySet().size(); i++)
-			M[i][0] = i;
-
-		// compute values from smaller to bigger intervals
-		for (j = 1; (1 << j) <= R.keySet().size(); j++)
-			for (i = 0; i + (1 << j) - 1 < R.keySet().size(); i++)
-				if (L[R.get(E[M[i][j - 1]])] < L[R
-						.get(E[M[i + (1 << (j - 1))][j - 1]])]) {
-					M[i][j] = M[i][j - 1];
-				} else {
-					M[i][j] = M[i + (1 << (j - 1))][j - 1];
-				}
-
-		// compare nodes levels
-		// get node level from L (needs node index)
-		// get node index (needs node and R)
-		// get node (needs index and E)
-		// get index (needs M)
-	}
-	
-	public Node RMQ(Node u, Node v) {
-
-		int k = (int) (Math.log(Math.abs(R.get(v) - R.get(u))) / Math.log(2));
-
-		// do we need the abs?
-		// what about identifying the bigger (and smaller) index in the
-		// beginning?
-		if (L[M[R.get(u)][k]] <= L[M[(int) (R.get(v) - 1 << k + 1)][k]]) {
-			return E[M[R.get(u)][k]];
-		} else {
-			return E[M[(int) (R.get(v) - 1 << k + 1)][k]];
-		}
-	}
 }
