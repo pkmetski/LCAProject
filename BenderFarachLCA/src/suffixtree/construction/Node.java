@@ -16,7 +16,7 @@ public class Node implements INode{
 	int begin;
 	int end;
 	Node[] children;
-	Node parent;
+	public Node parent;
 	Node suffixLink;
 
 	Node(int id, int begin, int end, int depth, Node parent) {

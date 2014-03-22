@@ -78,7 +78,7 @@ public class RMQSolution {
 		int j = (u > v)? u : v;
 		int k = (int) Math.round(Math.log(j-i) / Math.log(2));
 		
-		a = Math.min(l[st[i][k]], l[st[j-(2 << k)+1][k]]);
+		a = (l[st[i][k]] <= l[st[j-(1 << k)+1][k]])? e[st[i][k]] : e[st[j-(1 << k)+1][k]];
 	}
 	
 	public void solveB(int u, int v){

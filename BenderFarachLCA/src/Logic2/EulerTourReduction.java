@@ -37,7 +37,9 @@ public class EulerTourReduction {
 	
 	private EdgesOfNode[] next; // adjacency lists for each node of size [V]
 	private int[] first; // map to the first entry of the adjacency list of size [V]
-
+	
+	private int ci; // current index from the tour
+	private int lvl; // current level in the tour
 
 	public EulerTourReduction(int n) {
 		this.n = n;
@@ -62,6 +64,26 @@ public class EulerTourReduction {
 		step2();
 		step3();
 		step4();
+	}
+	
+	public void euler_tour_plamen_jesper(Node root){
+		E[ci] = root.id;
+		L[ci] = lvl;
+		R[root.id] = ci;
+		ci++;
+		for(Node current: root.children()){
+			if(current != null){
+				lvl++;
+				euler_tour_plamen_jesper(current);
+				lvl--;
+				E[ci] = root.id;
+				L[ci] = lvl;
+				if(root.id!=0 && R[root.id]==0){
+					R[root.id] = ci;
+				}
+				ci++;
+			}
+		}
 	}
 	
 	/*

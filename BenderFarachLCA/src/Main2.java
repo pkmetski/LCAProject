@@ -12,10 +12,11 @@ public class Main2 {
 		Node root = SuffixTree.buildSuffixTree(s);
 
 		EulerTourReduction et = new EulerTourReduction(root.nodes);
-		et.euler_tour(root);
+//		et.euler_tour(root);
+		et.euler_tour_plamen_jesper(root);
 		
 		RMQSolution rmq = new RMQSolution(et.getE(),et.getL(),et.getR());
-		int answer = rmq.solveA(4, 5);
+		int answer = rmq.solveA(4, 8);
 		
 		// checks - to be deleted later.......................................
 		// check tree node ordering
@@ -39,34 +40,24 @@ public class Main2 {
 		// check mapping (first)
 		//et.checkMapping();
 		
-		// separate the tree and the list checks
-		System.out.println();
-		
 		// check tour of nodes visited (E)
+		System.out.println();
 		et.checkE();
 		
-		// separate the tree and the list checks
-		System.out.println();
-		
 		// check tour of node levels (L)
+		System.out.println();
 		et.checkL();
 		
-		// separate the tree and the list checks
-		System.out.println();
-		
 		// check tour of node levels (R)
+		System.out.println();
 		et.checkR();
 		
-		// separate the tree and the list checks
-		System.out.println();
-		
 		// check sparse tree (st)
-		rmq.checkSparseTree();
-		
-		// separate the tree and the list checks
-		System.out.println();
+		//System.out.println();
+		//rmq.checkSparseTree();
 		
 		// check answer
+		System.out.println();
 		System.out.println(answer);
 		
 		// ...................................................................
