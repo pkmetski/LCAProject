@@ -14,7 +14,7 @@ public class RMQRestricted {
 	private int[] Ap;
 	private int[] B;
 	private int blockSize;
-	private int[][] blocks;
+	private int[][][] blocksRmq;
 
 	public RMQRestricted(Map<INode, Integer> R, INode[] E, int[] L) {
 		this.R = R;
@@ -24,77 +24,117 @@ public class RMQRestricted {
 
 	public void process() {
 		blockSize = (int) (Math.ceil((Math.log(L.length) / Math.log(2))) / 2);
-		int length = (int) Math.ceil(L.length / (double) blockSize);
-		Ap = new int[length];
-		B = new int[length];
+		int blocksCount = (int) Math.ceil(L.length / (double) blockSize);
+		Ap = new int[blocksCount];
+		B = new int[blocksCount];
+		blocksRmq = new int[blocksCount][blockSize][blockSize];
 
-		// 1. preprocess A'
-		// initialise A'
-		for (int i = 0; i < Ap.length; i++) {
-			Ap[i] = Integer.MAX_VALUE;
-		}
+		preprocessAPrime(L, Ap, B, blockSize);
+		normaliseBlocks(L, blockSize);// IS THIS NEEDED AT ALL?
+		normalisePlusMinus1(L);
+		preprocessUniqueBlocks(L, blocksRmq, blockSize);
 
-		for (int i = 0; i < Ap.length; i++) {
-			Ap[i] = i;
-			B[i] = i;
-		}
+		int j = 0;
+		j++;
+	}
 
-		for (int i = 0, k = 0; i < L.length; i += blockSize, k++) {
-			for (int j = i; j < i + blockSize && j < L.length; j++) {
-				if (L[i] < Ap[k]) {
-					Ap[k] = L[i];
-					B[k] = i;
+	private void preprocessAPrime(int[] A, int[] Ap, int[] B, int blockSize) {
+
+		for (int i = 0, k = 0; i < A.length; i += blockSize, k++) {
+			Ap[k] = Integer.MAX_VALUE;
+			for (int j = i; j < i + blockSize && j < A.length; j++) {
+				if (A[j] < Ap[k]) {
+					Ap[k] = A[j];
+					B[k] = j;
 				}
-				// normalize blocks
-				// L[j] = L[j] - L[i];
 			}
 		}
+	}
 
-		for (int i = 1; i < L.length - 1; i++) {
-			L[i] = L[i] - L[i + 1];
-		}
+	// normalize L by subtracting the initial offset of every block
+	private void normaliseBlocks(int[] A, int blockSize) {
 
-		blocks = new int[(int) (Math.ceil(Math.sqrt(L.length)))][(int) (Math
-				.ceil(Math.sqrt(L.length)) + 1)];// keeps a collection of
-													// blocks, where
-													// first
-													// dimension specifies the
-													// block
-													// signature,
-													// the second - the start
-													// index of each
-													// block in L
-
-		char[] key = new char[blockSize];
-
-		// 3. calculate all possible RMQs in each unique block
-		for (int i = 0; i < L.length - 1; i += blockSize) {
-			if (i == 0) {
-				continue;
+		int blockOffset = 0;
+		for (int i = 0; i < A.length; i += blockSize) {
+			// get the initial offset of the block
+			blockOffset = A[i];
+			for (int j = i; j < i + blockSize && j < A.length; j++) {
+				// for each element in the block, subtract the initial value
+				A[j] = A[j] - blockOffset;
 			}
-			for (int j = i, k = 0; j < i + blockSize && j < L.length - 1; j++) {
+		}
+	}
+
+	// normalize A by the +-1 rule
+	private void normalisePlusMinus1(int[] A) {
+
+		for (int i = 1; i < A.length - 1; i++) {
+			A[i] = A[i] - A[i + 1];
+		}
+	}
+
+	private void preprocessUniqueBlocks(int[] A, int[][][] blocksRmq,
+			int blockSize) {
+
+		// keeps a collection of blocks, where first dimension specifies the
+		// block signature, the second - the start index of each block in L
+		int[][] uniqueBlocks = new int[(int) (Math.ceil(Math.sqrt(A.length)))][(int) (Math
+				.ceil(Math.sqrt(A.length)) + 1)];
+
+		char[] binaryKey = new char[blockSize];
+
+		for (int i = 0; i < A.length - 1; i += blockSize) {
+
+			for (int j = i, k = 0; j < i + blockSize && j < A.length - 1; j++) {
 				// if L[i] is 1, add 1 to the
 				// key, otherwise, add 0
 				// (values of L should be 1
 				// or -1 only)
-				key[k++] = L[i] == 1 ? '1' : '0';
+				binaryKey[k++] = A[j] == 1 ? '1' : '0';
 			}
 
 			// after building the binary array for this block, convert it to
 			// key (int)
-			int intKey = Integer.parseInt(new String(key), blockSize);
+			int key = Integer.parseInt(new String(binaryKey), blockSize);
 
 			// get the array, corresponding to this key
-			// add the beginning of this block and increase the block counter
+			// add the start index of this block and increase the block counter
 			// for this key
-			blocks[intKey][++blocks[intKey][0]] = i;
+			uniqueBlocks[key][++uniqueBlocks[key][0]] = i;
 
-			// if there is just 1 block with this key, it needs to be
-			// preprocessed
-			if (blocks[intKey][blocks[intKey][0]] == 1) {
-				// TODO: do the preprocessing of the block here
+			// if this is the first block with this key,
+			// its rmqs need to be preprocessed
+			if (uniqueBlocks[key][0] == 1) {
+				blocksRmq[uniqueBlocks[key][1] / blockSize] = preprocessInBlockQueries(
+						A, uniqueBlocks[key][1], blockSize);
+			}
+			// we have already computed the queries for this block type
+			else if (1 < uniqueBlocks[key][0]) {
+				blocksRmq[uniqueBlocks[key][uniqueBlocks[key][0]] / blockSize] = blocksRmq[uniqueBlocks[key][uniqueBlocks[key][1]]
+						/ blockSize];
 			}
 		}
+	}
+
+	// calculate all possible RMQs in each unique block
+	private int[][] preprocessInBlockQueries(int[] A, int blockStart,
+			int blockSize) {
+
+		int[][] blockRmq = new int[blockSize][blockSize];
+
+		for (int i = blockStart; i - blockStart < blockSize && i < A.length; i++) {
+
+			for (int j = i, minIndex = i; j - blockStart < blockSize
+					&& j < A.length; j++) {
+
+				if (A[j] < A[minIndex]) {
+					minIndex = j;
+				}
+				blockRmq[i - blockStart][j - blockStart] = minIndex;
+				blockRmq[j - blockStart][i - blockStart] = minIndex;
+			}
+		}
+		return blockRmq;
 	}
 
 	public int RMQ(INode iNode, INode jNode) {
@@ -109,32 +149,53 @@ public class RMQRestricted {
 			return -1;
 		}
 
-		// TODO: determining which block index i belongs to
-
-		int iBStart = getBlockStart(i, L, blockSize);
 		int jBStart = getBlockStart(j, L, blockSize);
 
 		// if i and j are in the same block
-		if (iBStart == jBStart) {
+		if (getBlockStart(i, L, blockSize) == jBStart) {
 			// get the min for range i-j
-			return getMinWithinBlock(i, j);
-		} else {
+			return getMinInBlock(i, j, L, blockSize);
 			// if i and j are in different blocks
+		} else {
 			// get i's block end i'
+			int end = getBlockEnd(i, L, blockSize);
 			// get min for range i-i'
+			int minI = getMinInBlock(i, end, L, blockSize);
 			// get j's block start j'
 			// get min for range j'-j
+			int minJ = getMinInBlock(jBStart, j, L, blockSize);
 			// get the min for all the blocks between i and j
+			int minBetween = getMinBlocks(jBStart, end);
+
+			return Math.min(Math.min(minI, minJ), minBetween);
 		}
+	}
+
+	// i and j are known to be in the same block
+	private int getMinInBlock(int i, int j, int[] A, int blockSize) {
+
+		int bs = getBlockStart(i, A, blockSize);
+		return blocksRmq[bs / blockSize][i][j];
+	}
+
+	private int getBlockStart(int j, int[] A, int blockSize) {
+
+		// TODO: return the start of the block j belongs to
 		return 0;
 	}
 
-	private int getMinWithinBlock(int i, int j) {
+	private int getBlockEnd(int i, int[] A, int blockSize) {
+
+		// TODO: return the end of the block i belongs to
 		return 0;
 	}
 
-	private int getBlockStart(int i, int[] A, int blockSize) {
+	private int getMinBlocks(int start, int end) {
 
+		// TODO: return the min index of all blocks between start and end
+
+		// how do we do this in constant time? don't we always need some
+		// iteration?
 		return 0;
 	}
 }

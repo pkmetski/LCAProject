@@ -7,7 +7,7 @@ import Model.INode;
 public class Main {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
 		TreeController treeController = new TreeController(7);
 		INode tree = treeController.getTree();
 
