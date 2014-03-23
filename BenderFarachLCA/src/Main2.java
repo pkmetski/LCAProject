@@ -56,15 +56,16 @@ public class Main2 {
 		//System.out.println();
 		//rmq.checkSparseTree();
 		
-		// check answer
-//		System.out.println();
-//		System.out.println(answer);
-		
+		int answer = rmq.solveB(4, 8);
 		// check partitioning
+		//System.out.println();
+		//rmq.checkPartition();
+		//rmq.checkHashMap();
+		//rmq.checkSparseTree2();
+		
+		// check answer
 		System.out.println();
-		rmq.solveB(4, 8);
-		rmq.checkPartition();
-		rmq.checkHashMap();
+		System.out.println(answer);
 		
 		// ...................................................................
 

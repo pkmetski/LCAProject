@@ -9,6 +9,7 @@ public class RMQSolution {
 	private int[] l;
 	private int[] r;
 	private int[][] st; // sparse table
+	private int[][] st2;// sparse table for the +/-1 RMQ partitioning
 	private int a; // node id of the answer
 	
 	private int bs; 		// block size (logN/2)
@@ -80,10 +81,11 @@ public class RMQSolution {
 		a = (l[st[i][k]] <= l[st[j-(1 << k)+1][k]])? e[st[i][k]] : e[st[j-(1 << k)+1][k]];
 	}
 	
-	public void solveB(int u, int v){
+	public int solveB(int u, int v){
 		stepB1();
 		stepB2();
-		stepB3();
+		stepB3(r[u],r[v]);
+		return a;
 	}
 	
 	/*
@@ -260,19 +262,135 @@ public class RMQSolution {
 	
 	/*
 	 * Pre-processing 2
-	 * Use RMQ solveA for the partitioned blocks
+	 * Use RMQ solveA (only the pre-processing 'stepA1') for the partitioned blocks
 	 * (can only be done after partitioning)
+	 * 
+	 * create a sparse table for each possible query
+	 * 
+	 * pre-compute query of a length power of 2:
+	 * st2[i,j] = {st2[i,j-1] if l[st2[i,j-1]] <= l[st2[i+2^(j-1)-1,j-1]] | st2[i+2^(j-1)-1,j-1] otherwise}
 	 */
 	private void stepB2(){
+		st2 = new int[val.length][(int) Math.round((Math.log(val.length) / Math.log(2))) + 1];
 		
+		// initialize sparse table for the intervals with length 1
+		for (int i = 0; i < val.length; i++)
+			st2[i][0] = i;
+		
+		// compute values from smaller to bigger intervals
+		for (int j = 1; j < st2[0].length; j++)
+			for (int i = 0; i + (1 << j) - 1 < st2.length; i++)
+				if (val[st2[i][j - 1]] <= val[st2[i + (1 << (j - 1))][j - 1]])
+					st2[i][j] = st2[i][j - 1];
+				else
+					st2[i][j] = st2[i + (1 << (j - 1))][j - 1];
+	}
+	
+	/*
+	 * Check sparse table2 filled correctly
+	 */
+	public void checkSparseTree2(){
+		System.out.println();
+		for (int[] row : st2) 
+	        System.out.println(Arrays.toString(row));
 	}
 	
 	/*
 	 * Querying
+	 * - determine whether i and j are in the same block
+	 * - determine whether there are blocks between i and j
 	 * 
 	 */
-	private void stepB3(){
+	private void stepB3(int u, int v){
 		
+		if(u == v){a = e[u]; return;}
+		
+		int i = (u < v)? u : v;
+		int j = (u > v)? u : v;
+		
+		//i is in block (blocks start from 0):
+		int i_block = i/bs;
+		// at position:
+		int i_pos = i%bs;
+		
+		//j is in block (blocks start from 0):
+		int j_block = j/bs;
+		// at position:
+		int j_pos = j%bs;
+		
+		//blocks between i_block and j_block
+		int between_blocks = j_block - i_block - 1;
+		
+		if(i_block == j_block){
+			// find normalized block table
+			String vector_pattern = nb[i_block];
+			int[][] in_block_table = patterns.get(vector_pattern);
+			a = e[in_block_table[i_pos][j_pos]+i_block*bs];
+		}
+		else{
+			if(between_blocks > 0){
+				
+				// find normalized block table of i
+				String vector_pattern_i = nb[i_block];
+				int[][] in_block_table_i = patterns.get(vector_pattern_i);
+				int min_i_pos = in_block_table_i[i_pos][in_block_table_i.length-1];
+				
+				// find normalized block table of j
+				String vector_pattern_j = nb[j_block];
+				int[][] in_block_table_j = patterns.get(vector_pattern_j);
+				int min_j_pos = in_block_table_j[0][j_pos];
+				
+				// between blocks querying (actual position in l)
+				int min_between = 0;
+				
+				// if it happens that we have 1 in-between block, return its result so that log 0 does not occur
+				if(between_blocks == 1){
+					min_between = pos[i_block+1];
+				}
+				else{
+					int x = i_block+1; // after i_block
+					int y = j_block-1; // before j_block
+					
+					int k = (int) Math.round(Math.log(y-x) / Math.log(2));
+					
+					min_between = (val[st2[x][k]] <= val[st2[y-(1 << k)+1][k]])? pos[st2[x][k]] : pos[st2[y-(1 << k)+1][k]];
+				}
+				
+				if(l[min_i_pos + i_block*bs] <= l[min_j_pos + j_block*bs]){
+					if(l[min_i_pos + i_block*bs] <= l[min_between]){
+						a = e[min_i_pos + i_block*bs];
+					}
+					else{
+						a = e[min_between];
+					}
+				}
+				else{
+					if(l[min_between] <= l[min_j_pos + j_block*bs]){
+						a = e[min_between];
+					}
+					else{
+						a = e[min_j_pos + j_block*bs];
+					}
+				}
+			}
+			else{
+				// find normalized block table of i
+				String vector_pattern_i = nb[i_block];
+				int[][] in_block_table_i = patterns.get(vector_pattern_i);
+				int min_i_pos = in_block_table_i[i_pos][in_block_table_i.length-1];
+				
+				// find normalized block table of j
+				String vector_pattern_j = nb[j_block];
+				int[][] in_block_table_j = patterns.get(vector_pattern_j);
+				int min_j_pos = in_block_table_j[0][j_pos];
+				
+				if(l[min_i_pos + i_block*bs] <= l[min_j_pos + j_block*bs]){
+					a = e[min_i_pos + i_block*bs];
+				}
+				else{
+					a = e[min_j_pos + j_block*bs];
+				}
+			}
+		}
 	}
-	
 }
