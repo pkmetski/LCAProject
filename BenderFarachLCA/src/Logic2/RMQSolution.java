@@ -15,7 +15,7 @@ public class RMQSolution {
 	private int[] val; 		// values for min element in blocks of size logN/2 -> resembles A'
 	private int[] pos; 		// positions for min element in blocks of size logN/2 -> resembles B
 	private String[] nb; 	// normalized block reference for each block
-	private HashMap<String,String> patterns = new HashMap<String,String>(); //unique normalized blocks and their O(n^2) table
+	private HashMap<String,int[][]> patterns = new HashMap<String,int[][]>(); //unique normalized blocks and their O(n^2) table
 	
 	// RMQ using sparse tree
 	public RMQSolution(int[] e, int[] l, int[] r){
@@ -34,6 +34,7 @@ public class RMQSolution {
 	}
 	
 	/*
+	 * Pre-processing
 	 * create a sparse table for each possible query
 	 * 
 	 * pre-compute query of a length power of 2:
@@ -65,6 +66,7 @@ public class RMQSolution {
 	}
 	
 	/*
+	 * Querying
 	 * select 2 overlapping blocks that cover the subrange entirely
 	 */
 	private void stepA2(int u, int v){
@@ -81,46 +83,98 @@ public class RMQSolution {
 	public void solveB(int u, int v){
 		stepB1();
 		stepB2();
+		stepB3();
 	}
 	
 	/*
-	 * Partition A into blocks of size (log n) / 2
+	 * Pre-processing 1
+	 * Partition A (l) into blocks of size (log n) / 2
+	 * - determine block size
+	 * - define arrays for the value and position of the minimum element in a block
+	 * - define an array of the same size to reference normalized blocks
+	 * - create and save in-block-tables while discovering blocks and unique vectors
 	 * 
-	 * determine block size
-	 * define arrays for the value and position of the minimum element in a block
-	 * define an array of the same size to reference normalized blocks
-	 * i*bs maps val[i] to l-block
+	 * i*bs maps val[i] to A-block
 	 */
 	private void stepB1(){
-		double lgN = Math.round((Math.log(l.length) / Math.log(2)));
+		double lgN = Math.round((Math.log(l.length) / Math.log(2))); // logN
 		bs = (int) (lgN / 2); // block size
 		
 		int vps = (int) Math.round(2*l.length / lgN);// val(A') and pos(B) size
 		val = new int[vps]; 		// val(A')
 		pos = new int[vps]; 		// pos(B )
-		nb = new String[vps]; 	// normalized block reference
-		StringBuilder vector = new StringBuilder();// vector pattern
+		nb = new String[vps]; 		// normalized block reference
 		
-		int cb = 0; 					// keeps track of current block
-		int minV = l[0];			 	// keeps track of minimal value
-		int minP = 0; 					// keeps track of minimal position
+		StringBuilder vector = new StringBuilder();	// keeps track of vector pattern
+		int cb = 0; 								// keeps track of current block
+		int minV = l[0];			 				// keeps track of minimal value
+		int minP = 0; 								// keeps track of minimal position
 		
 		for(int i = 1; i < l.length; i++){
+			
 			// determine the start of a new block - finish previous and reset values
 			if(i % bs == 0){
-				// save unique vector patterns and start a new one
-				nb[cb] = vector.toString();
-				if(!patterns.containsKey(vector)) patterns.put(nb[cb], "table");
-				vector = new StringBuilder(); //start new
 				
+				//// check block
+				//System.out.println();
+				//for(int x = 0 + cb*bs; x < bs + cb*bs; x++){
+				//	System.out.print(""+l[x]+",");
+				//}
+				
+				// make reference to normalized block
+				nb[cb] = vector.toString();
+				
+				// save unique vector patterns
+				if(!patterns.containsKey(vector.toString())){
+					// create O(n^2) position table
+					int[][] in_block_table = new int[bs][bs];
+					for(int x = 0; x < bs; x++)
+						for(int y = x; y < bs; y++){
+							if(x == y){
+								in_block_table[x][y] = x;
+								continue;
+							}
+							else{
+								if(l[y + cb*bs] < l[in_block_table[x][y-1]  + cb*bs]){  // remember indent of block
+									in_block_table[x][y] = y;
+									in_block_table[y][x] = y;
+								}
+								else{
+									in_block_table[x][y] = in_block_table[x][y-1];
+									in_block_table[y][x] = in_block_table[x][y-1];
+								}
+							}
+						}
+					
+					//// check vector
+					//System.out.println();
+					//System.out.print(vector);
+					
+					//// check table
+					//System.out.println();
+					//for (int[] row : in_block_table)
+				    //    System.out.println(Arrays.toString(row));
+					
+					// save pattern and table
+					patterns.put(nb[cb], in_block_table);
+				}
+				
+				// start a new vector pattern
+				vector = new StringBuilder();
+				
+				// determine minimum for block
 				val[cb]=minV;
 				pos[cb]=minP;
+				
+				// mark the beginning of a new block
 				cb++;
+				
+				// reset minimum
 				minV = Integer.MAX_VALUE;
 			}
 			else{
 				// continue vector pattern
-				vector.append(l[i-1] - l[i]);
+				vector.append(l[i] - l[i-1]);
 			}
 			
 			// keep track of min value and its position
@@ -128,14 +182,51 @@ public class RMQSolution {
 				minV = l[i];
 				minP = i;
 			}
+			
 			// add the remaining elements of the array in a separate block of a smaller size
 			if(i == l.length-1){
-				// save vector pattern
-				if(i % bs -1 > 0){//avoid a pattern of size 0
+				
+				//// check block
+				//System.out.println();
+				//for(int x = 0 + cb*bs; x < l.length; x++){
+				//	System.out.print(""+l[x]+",");
+				//}
+				
+				// avoid a pattern of size 0
+				if(i % bs -1 > 0){
+					
+					// make reference to normalized block
 					nb[cb] = vector.toString();
-					if(!patterns.containsKey(vector)) patterns.put(nb[cb], "table");
+					
+					// save unique vector pattern
+					if(!patterns.containsKey(vector)){
+						// create O(n^2) position table
+						int[][] in_block_table = new int[l.length-cb*bs][l.length-cb*bs];
+						for(int x = 0; x < l.length-cb*bs; x++)
+							for(int y = x; y < l.length-cb*bs; y++){
+								if(x == y){
+									in_block_table[x][y] = x;
+									continue;
+								}
+								else{
+									if(l[y + cb*bs] < l[in_block_table[x][y-1]  + cb*bs]){  // remember indent of block
+										in_block_table[x][y] = y;
+										in_block_table[y][x] = y;
+									}
+									else{
+										in_block_table[x][y] = in_block_table[x][y-1];
+										in_block_table[y][x] = in_block_table[x][y-1];
+									}
+								}
+							}
+
+						
+						// save pattern and table
+						patterns.put(nb[cb], in_block_table);
+					}
 				}
 				
+				// determine minimum for last block
 				val[cb]=minV;
 				pos[cb]=minP;
 			}
@@ -159,12 +250,28 @@ public class RMQSolution {
 		System.out.println();
 		for (String name: patterns.keySet()){
 			String key =name;
-			String value = patterns.get(name);
-			System.out.println(key + " " + value);
+			int[][] in_block_table = patterns.get(name);
+			// check table
+			System.out.println(key);
+			for (int[] row : in_block_table)
+		        System.out.println(Arrays.toString(row));
 		}
 	}
 	
+	/*
+	 * Pre-processing 2
+	 * Use RMQ solveA for the partitioned blocks
+	 * (can only be done after partitioning)
+	 */
 	private void stepB2(){
+		
+	}
+	
+	/*
+	 * Querying
+	 * 
+	 */
+	private void stepB3(){
 		
 	}
 	
