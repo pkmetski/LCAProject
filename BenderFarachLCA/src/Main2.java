@@ -1,9 +1,10 @@
 import java.util.Arrays;
 
+import suffixtree2.construction.Node;
+import suffixtree2.construction.SuffixTree;
 import Logic2.EulerTourReduction;
+import Logic2.NaiveSolution;
 import Logic2.RMQSolution;
-import suffixtree.construction.SuffixTree;
-import suffixtree.construction.Node;
 
 public class Main2 {
 
@@ -12,11 +13,11 @@ public class Main2 {
 		Node root = SuffixTree.buildSuffixTree(s);
 
 		EulerTourReduction et = new EulerTourReduction(root.nodes);
-//		et.euler_tour(root);
+		//		et.euler_tour(root); //inefficient
 		et.euler_tour_plamen_jesper(root);
 		
 		RMQSolution rmq = new RMQSolution(et.getE(),et.getL(),et.getR());
-//		int answer = rmq.solveA(4, 8);
+		//		int answer = rmq.solveA(4, 8); //RMQ solution
 		
 		// checks - to be deleted later.......................................
 		// check tree node ordering
@@ -41,27 +42,32 @@ public class Main2 {
 		//et.checkMapping();
 		
 		// check tour of nodes visited (E)
-		System.out.println();
-		et.checkE();
+		//System.out.println();
+		//et.checkE();
 		
 		// check tour of node levels (L)
-		System.out.println();
-		et.checkL();
+		//System.out.println();
+		//et.checkL();
 		
 		// check tour of node levels (R)
-		System.out.println();
-		et.checkR();
+		//System.out.println();
+		//et.checkR();
 		
 		// check sparse tree (st)
 		//System.out.println();
 		//rmq.checkSparseTree();
 		
-		int answer = rmq.solveB(4, 8);
+				int answer = rmq.solveB(4, 8); //RMQ +/-1 solution
 		// check partitioning
 		//System.out.println();
 		//rmq.checkPartition();
 		//rmq.checkHashMap();
 		//rmq.checkSparseTree2();
+		
+//		NaiveSolution naive = new NaiveSolution(root);
+//		naive.solve(4, 8);
+		//naive.checkPaths();
+//		int answer = naive.answer;
 		
 		// check answer
 		System.out.println();

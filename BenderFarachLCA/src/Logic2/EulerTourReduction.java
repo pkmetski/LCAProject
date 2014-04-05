@@ -2,7 +2,7 @@ package Logic2;
 
 import java.util.Arrays;
 
-import suffixtree.construction.Node;
+import suffixtree2.construction.Node;
 
 /*****************************************************
  * Reduce the LCA problem to RMQ (perform the Euler tour) that results in 3 arrays:
