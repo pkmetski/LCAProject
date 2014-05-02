@@ -17,7 +17,7 @@ public class RMQSt {
 		this.L = L;
 	}
 
-	public void process() {
+	public void preprocess() {
 
 		M = new int[L.length][(int) Math.round((Math.log(L.length) / Math
 				.log(2)))];

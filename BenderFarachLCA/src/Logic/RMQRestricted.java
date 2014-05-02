@@ -24,7 +24,7 @@ public class RMQRestricted {
 		this.L = L;
 	}
 
-	public void process() {
+	public void preprocess() {
 		blockSize = (int) (Math.ceil((Math.log(L.length) / Math.log(2))) / 2);
 		int blocksCount = (int) Math.ceil(L.length / (double) blockSize);
 		Ap = new int[blocksCount];

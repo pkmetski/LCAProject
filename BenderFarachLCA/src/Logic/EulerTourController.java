@@ -4,25 +4,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 import Model.INode;
+import Model.Tree;
 
 public class EulerTourController {
 
-	private int n;
 	private INode[] E;// nodes visited in euler tour order
 	private int[] L;// node level
 	private Map<INode, Integer> R;// representative of node
 	private int nodeIndex = -1;
 	private int level = -1;
+	private Tree tree;
 
-	public EulerTourController(int n) {
-		this.n = n;
-		this.E = new INode[(2 * n) - 1];
-		this.L = new int[(2 * n) - 1];
-		this.R = new HashMap<INode, Integer>(n);
+	public EulerTourController(Tree tree) {
+		this.tree = tree;
+		this.E = new INode[(2 * tree.getN()) - 1];
+		this.L = new int[(2 * tree.getN()) - 1];
+		this.R = new HashMap<INode, Integer>(tree.getN());
 	}
 
-	public void process(INode root) {
-		eulerTour(root);
+	public void preprocess() {
+		eulerTour(tree.getRoot());
 	}
 
 	private void eulerTour(INode parent) {
