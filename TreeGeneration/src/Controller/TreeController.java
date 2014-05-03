@@ -2,6 +2,7 @@ package Controller;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 import javax.naming.directory.InvalidAttributeValueException;
 
@@ -10,9 +11,7 @@ import Model.Tree;
 
 public class TreeController {
 
-	public TreeController() {
-
-	}
+	private INode node1, node2;
 
 	public Tree createTree(int[] args) throws InvalidAttributeValueException {
 		// pre-conditions
@@ -21,25 +20,36 @@ public class TreeController {
 		int N = args[0];
 		int B = args[1];
 		int D = args[2];
+		node1 = null;
+		node2 = null;
 		if (/* N < B + 1 || */N < D || N < D + B) {
 			throw new InvalidAttributeValueException();
 		}
 
+		/* The random 2 nodes to be used when testing the algorithms */
+		Random rnd = new Random();
+		int node1Label = rnd.nextInt(N);
+		int node2Label = rnd.nextInt(N);
+
 		Tree tree = new Tree();
 		while (tree.getN() < N) {
 			INode node = getNextNode(tree, D, B);
-			tree.addChild(node);
+			INode child = tree.addChild(node);
+			if (child.getLabel() == node1Label) {
+				node1 = child;
+			} else if (child.getLabel() == node2Label) {
+				node2 = child;
+			}
 		}
-
 		return tree;
 	}
 
 	public INode getNode1() {
-		return null;/* FIND THE APPROPRIATE NODE */
+		return node1;
 	}
 
 	public INode getNode2() {
-		return null;/* FIND THE APPROPRIATE NODE */
+		return node2;
 	}
 
 	private INode getNextNode(Tree tree, int D, int B) {

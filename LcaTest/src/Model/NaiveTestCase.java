@@ -9,6 +9,8 @@ public class NaiveTestCase extends TestCase {
 	public NaiveTestCase(Tree tree, INode node1, INode node2,
 			boolean preprocessAlways) {
 		super(tree, node1, node2, preprocessAlways);
+
+		naiveAlgorithm = new LCANaive(tree);
 	}
 
 	public void preprocess() {

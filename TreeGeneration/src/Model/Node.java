@@ -6,13 +6,17 @@ import java.util.List;
 public class Node implements INode {
 
 	private ArrayList<INode> children;
-	private String label;
+	private int label;
 	private INode parent;
 	private int depth;
 
-	public Node(String label) {
+	public Node(int label) {
 		this.children = new ArrayList<INode>();
 		this.label = label;
+	}
+
+	public int getLabel() {
+		return this.label;
 	}
 
 	public List<INode> getChildren() {

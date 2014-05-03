@@ -12,7 +12,7 @@ public class Tree {
 		this.N = 0;
 		this.B = 0;
 		this.D = 0;
-		addRoot(new Node(Integer.toString(nodeId++)));
+		addRoot(new Node(nodeId++));
 	}
 
 	public INode getRoot() {
@@ -27,8 +27,8 @@ public class Tree {
 		this.N++;
 	}
 
-	public void addChild(INode parent) {
-		INode child = new Node(Integer.toString(nodeId++));
+	public INode addChild(INode parent) {
+		INode child = new Node(nodeId++);
 		parent.addChild(child);
 		child.setDepth(parent.getDepth() + 1);
 		child.setParent(parent);
@@ -46,6 +46,7 @@ public class Tree {
 		if (this.B < childrenCount) {
 			this.B = childrenCount;
 		}
+		return child;
 	}
 
 	public int getN() {

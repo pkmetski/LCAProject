@@ -30,9 +30,9 @@ public abstract class TestCase {
 	}
 
 	public String getTestCaseName() {
-		return String.format("%s N: %s; B: %s; D: %s; Time: %s",
+		return String.format("%s N: %s; B: %s; D: %s; Single Runs: %s",
 				getAlgorithmName(), tree.getN(), tree.getB(), tree.getD(),
-				elapsedTime);
+				preprocessAlways);
 	}
 
 	public boolean getPreprocessAlways() {

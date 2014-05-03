@@ -2,7 +2,9 @@ package Controller;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.naming.directory.InvalidAttributeValueException;
+
 import Model.INode;
 import Model.NaiveTestCase;
 import Model.RestrictedTestCase;
@@ -16,104 +18,65 @@ import Model.Tree;
  */
 public class TestController {
 
+	private enum Algorithm {
+		Naive, SparseTable, Restricted
+	};
+
 	private final int[] factors;
-	private final int[] arguments;
+	private final int[] baseArgs;
+	private final Algorithm[] algorithms;
+	private final int executions;
 	private TreeController treeController = new TreeController();
 
 	public TestController() {
 		factors = new int[] { 1, 2, 4, 8 };
-		arguments = new int[] { 2400, 100, 200 };
+		baseArgs = new int[] { 40000, 100, 2000 };
+		executions = 1;
+		algorithms = new Algorithm[] { Algorithm.Naive };
 	}
 
 	public void runTests() throws InvalidAttributeValueException {
 
 		Map<TestCase, Double> results = new HashMap<TestCase, Double>();
-		int executions = 10;
 		boolean preprocessAlways = false;
 
-		do {
+		// do {
+		Tree baseTree = treeController.createTree(baseArgs);
+		// test the base cases
+		for (Algorithm algorithm : algorithms) {
+			testAlgorithm(algorithm, baseTree, treeController.getNode1(),
+					treeController.getNode2(), preprocessAlways, executions,
+					results);
+		}
 
-			// naive alg base case
-			Tree naiveBaseTree = treeController.createTree(arguments);
-			INode node1 = treeController.getNode1(), node2 = treeController
-					.getNode2();
-			TestCase naiveBaseTestCase = new NaiveTestCase(naiveBaseTree,
-					node1, node2, preprocessAlways);
-			recordResult(results, naiveBaseTestCase, executions);
+		// first, loop through arguments - N, B, D
+		for (int a = 0; a < baseArgs.length; a++) {
+			// next, loop through factors - 2,4,8
+			for (int f = 1; f < factors.length; f++) {
 
-			// sparse table alg base case
-			Tree sparseBaseTree = treeController.createTree(arguments);
-			TestCase sparseBaseTestCase = new SparseTableTestCase(
-					sparseBaseTree, node1, node2, preprocessAlways);
-			recordResult(results, sparseBaseTestCase, executions);
-
-			// restricted alg base case
-			Tree restrictedBaseTree = treeController.createTree(arguments);
-			TestCase restrictedBaseTestCase = new RestrictedTestCase(
-					restrictedBaseTree, node1, node2, preprocessAlways);
-			recordResult(results, restrictedBaseTestCase, executions);
-
-			// first, loop through arguments - N, B, D
-			for (int a = 0; a < arguments.length; a++) {
-				// next, loop through factors - 2,4,8
-				for (int f = 1; f < factors.length; f++) {
-
-					// create the correct arguments for the current scale and
-					// argument
-					int[] args = new int[arguments.length];
-					for (int k = 0; k < arguments.length; k++) {
-						if (k == a) {
-							args[k] = arguments[k] * factors[f];
-						} else {
-							args[k] = arguments[k];
-						}
+				// create the correct arguments for the current scale and
+				// argument
+				int[] nonBaseArgs = new int[baseArgs.length];
+				for (int k = 0; k < baseArgs.length; k++) {
+					if (k == a) {
+						nonBaseArgs[k] = baseArgs[k] * factors[f];
+					} else {
+						nonBaseArgs[k] = baseArgs[k];
 					}
-
-					// for each algorithm, create a tree with the specific
-					// arguments
-
-					// naive alg
-					Tree naiveAlgTree = treeController.createTree(args);
-					node1 = treeController.getNode1();
-					node2 = treeController.getNode2();
-					TestCase naiveTestCase = new NaiveTestCase(naiveAlgTree,
-							node1, node2, preprocessAlways);
-					recordResult(results, naiveTestCase, executions);
-
-					// sparse table alg
-					Tree sparseAlgTree = treeController.createTree(args);
-					TestCase sparseTestCase = new SparseTableTestCase(
-							sparseAlgTree, node1, node2, preprocessAlways);
-					recordResult(results, sparseTestCase, executions);
-
-					// restricted alg
-					Tree restrictedAlgTree = treeController.createTree(args);
-					TestCase restrictedTestCase = new RestrictedTestCase(
-							restrictedAlgTree, node1, node2, preprocessAlways);
-					recordResult(results, restrictedTestCase, executions);
+				}
+				Tree nonBaseTree = treeController.createTree(nonBaseArgs);
+				// test the non-base cases
+				for (Algorithm algorithm : algorithms) {
+					testAlgorithm(algorithm, nonBaseTree, treeController.getNode1(),
+							treeController.getNode2(), preprocessAlways,
+							executions, results);
 				}
 			}
-			preprocessAlways = !preprocessAlways;
-		} while (preprocessAlways);
+		}
+		preprocessAlways = !preprocessAlways;
+		// } while (preprocessAlways);
 
 		printResults(results);
-	}
-
-	private double runTestCase(TestCase testCase, int executions) {
-
-		return 0;
-		// for (int i = 0; i < executions; i++) {
-		// if (i == 0 || testCase.getPreprocessAlways()) {
-		// testCase.preprocess();
-		// }
-		// testCase.executeQuery();
-		// }
-		// return testCase.elapsedTime() / executions;
-	}
-
-	private void recordResult(Map<TestCase, Double> results, TestCase testCase,
-			int executions) {
-		results.put(testCase, runTestCase(testCase, executions));
 	}
 
 	private void printResults(Map<TestCase, Double> results) {
@@ -121,5 +84,41 @@ public class TestController {
 			System.out.println(String.format("Test Case: %s; Running Time: %s",
 					entry.getKey().getTestCaseName(), entry.getValue()));
 		}
+	}
+
+	private void testAlgorithm(Algorithm algorithm, Tree tree, INode node1,
+			INode node2, boolean preprocessAlways, int executions,
+			Map<TestCase, Double> results)
+			throws InvalidAttributeValueException {
+		TestCase testCase = null;
+
+		switch (algorithm) {
+		case Naive:
+			testCase = new NaiveTestCase(tree, node1, node2, preprocessAlways);
+			break;
+		case SparseTable:
+			testCase = new SparseTableTestCase(tree, node1, node2,
+					preprocessAlways);
+			break;
+		case Restricted:
+			testCase = new RestrictedTestCase(tree, node1, node2,
+					preprocessAlways);
+			break;
+		default:
+			throw new InvalidAttributeValueException(String.format(
+					"Algorithm of type %s is not known", algorithm));
+		}
+		double result = runTestCase(testCase, executions);
+		results.put(testCase, result);
+	}
+
+	private double runTestCase(TestCase testCase, int executions) {
+		for (double i = 0; i < executions; i++) {
+			if (i == 0 || testCase.getPreprocessAlways()) {
+				testCase.preprocess();
+			}
+			testCase.executeQuery();
+		}
+		return testCase.elapsedTime() / executions;
 	}
 }

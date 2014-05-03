@@ -27,8 +27,6 @@ public class RMQSt {
 
 		for (int j = 1; (1 << j) <= L.length; j++) {
 			for (int i = 0; i + (1 << j) - 1 < L.length; i++) {
-				int a = i + (1 << (j - 1));
-				int b = j - 1;
 				if (L[M[i][j - 1]] <= L[M[i + (1 << (j - 1))][j - 1]]) {
 					M[i][j] = M[i][j - 1];
 				} else {

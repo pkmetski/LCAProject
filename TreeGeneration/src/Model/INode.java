@@ -4,6 +4,8 @@ import java.util.List;
 
 public interface INode {
 
+	int getLabel();
+
 	List<INode> getChildren();
 
 	void addChild(INode child);
