@@ -1,17 +1,21 @@
 package Model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
-public class Node implements INode {
+public class Node implements INode, Serializable {
 
-	private ArrayList<INode> children;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private INode[] children;
+	private int count = 0;
 	private int label;
 	private INode parent;
 	private int depth;
 
-	public Node(int label) {
-		this.children = new ArrayList<INode>();
+	public Node(int label, int childrenCount) {
+		this.children = new INode[childrenCount];
 		this.label = label;
 	}
 
@@ -19,13 +23,17 @@ public class Node implements INode {
 		return this.label;
 	}
 
-	public List<INode> getChildren() {
+	public INode[] getChildren() {
 		return children;
+	}
+
+	public int getChildrenCount() {
+		return this.count;
 	}
 
 	public void addChild(INode child) {
 		child.setParent(this);
-		children.add(child);
+		children[count++] = child;
 	}
 
 	public void setParent(INode parent) {

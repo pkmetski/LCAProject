@@ -9,7 +9,7 @@ public class Main {
 
 		TreeController tc = new TreeController();
 		try {
-			Tree tree = tc.createTree(new int[] { 5000, 2000, 10 });
+			Tree tree = tc.createTree(new int[] { 1000000, 200, 100000 });
 		} catch (InvalidAttributeValueException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

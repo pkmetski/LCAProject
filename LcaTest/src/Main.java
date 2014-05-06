@@ -8,7 +8,7 @@ public class Main {
 		TestController tst = new TestController();
 		try {
 			tst.runTests();
-		} catch (InvalidAttributeValueException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -11,18 +11,16 @@ import Model.Tree;
 
 public class TreeController {
 
-	private INode node1, node2;
+	private int B;
 
 	public Tree createTree(int[] args) throws InvalidAttributeValueException {
 		// pre-conditions
 		// b+1 <= n
 		// d <= n
 		int N = args[0];
-		int B = args[1];
+		this.B = args[1];
 		int D = args[2];
-		node1 = null;
-		node2 = null;
-		if (/* N < B + 1 || */N < D || N < D + B) {
+		if (/* N < B + 1 || */N < D || N < D + B - 1) {
 			throw new InvalidAttributeValueException();
 		}
 
@@ -31,25 +29,17 @@ public class TreeController {
 		int node1Label = rnd.nextInt(N);
 		int node2Label = rnd.nextInt(N);
 
-		Tree tree = new Tree();
+		Tree tree = new Tree(B);
 		while (tree.getN() < N) {
 			INode node = getNextNode(tree, D, B);
 			INode child = tree.addChild(node);
 			if (child.getLabel() == node1Label) {
-				node1 = child;
+				tree.setNode1(child);
 			} else if (child.getLabel() == node2Label) {
-				node2 = child;
+				tree.setNode2(child);
 			}
 		}
 		return tree;
-	}
-
-	public INode getNode1() {
-		return node1;
-	}
-
-	public INode getNode2() {
-		return node2;
 	}
 
 	private INode getNextNode(Tree tree, int D, int B) {
@@ -78,6 +68,9 @@ public class TreeController {
 		}
 
 		for (INode node : root.getChildren()) {
+			if (node == null) {
+				break;
+			}
 			root = dfs(node, D);
 		}
 		return root;
@@ -92,11 +85,14 @@ public class TreeController {
 
 			// if this node's branching factor is one
 			// less than we need, return it
-			if (node.getChildren().size() < B) {
+			if (node.getChildrenCount() < B) {
 				return node;
 			}
 
 			for (INode child : node.getChildren()) {
+				if (child == null) {
+					break;
+				}
 				q.add(child);
 			}
 		}

@@ -1,12 +1,12 @@
 package Model;
 
-import java.util.List;
-
-public interface INode {
+public interface INode{
 
 	int getLabel();
 
-	List<INode> getChildren();
+	INode[] getChildren();
+	
+	int getChildrenCount();
 
 	void addChild(INode child);
 
