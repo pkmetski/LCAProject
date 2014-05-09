@@ -51,4 +51,9 @@ public class Node implements INode, Serializable {
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
+
+	@Override
+	public int hashCode() {
+		return this.label;
+	}
 }

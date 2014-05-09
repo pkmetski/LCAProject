@@ -20,7 +20,7 @@ public class RMQSt {
 	public void preprocess() {
 
 		M = new int[L.length][(int) Math.round((Math.log(L.length) / Math
-				.log(2)))];
+				.log(2)))+1];
 
 		for (int i = 0; i < L.length; i++)
 			M[i][0] = i;

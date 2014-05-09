@@ -11,35 +11,31 @@ import Model.Tree;
 
 public class TreeController {
 
-	private int B;
+	private int N, B, D;
+	private Random rnd = new Random();
+	private Tree tree;
 
 	public Tree createTree(int[] args) throws InvalidAttributeValueException {
 		// pre-conditions
 		// b+1 <= n
 		// d <= n
-		int N = args[0];
+		this.N = args[0];
 		this.B = args[1];
-		int D = args[2];
+		this.D = args[2];
 		if (/* N < B + 1 || */N < D || N < D + B - 1) {
 			throw new InvalidAttributeValueException();
 		}
 
-		/* The random 2 nodes to be used when testing the algorithms */
-		Random rnd = new Random();
-		int node1Label = rnd.nextInt(N);
-		int node2Label = rnd.nextInt(N);
-
-		Tree tree = new Tree(B);
+		this.tree = new Tree(N, B, D);
 		while (tree.getN() < N) {
-			INode node = getNextNode(tree, D, B);
-			INode child = tree.addChild(node);
-			if (child.getLabel() == node1Label) {
-				tree.setNode1(child);
-			} else if (child.getLabel() == node2Label) {
-				tree.setNode2(child);
-			}
+			INode parentNode = getNextNode(tree, D, B);
+			tree.addChild(parentNode);
 		}
 		return tree;
+	}
+
+	public INode getRandomNode(Tree tree, int N) {
+		return tree.getNode(rnd.nextInt(N));
 	}
 
 	private INode getNextNode(Tree tree, int D, int B) {
@@ -47,8 +43,8 @@ public class TreeController {
 		if (tree.getD() < D) {
 			// do a depth first on the tree
 			// at this point, B = 1
-
-			return dfs(tree.getRoot(), D);
+			return tree.getLastNode();
+			// return dfs(tree.getRoot(), D);
 		}
 		// if D is reached
 		else {
@@ -84,16 +80,20 @@ public class TreeController {
 			INode node = q.poll();
 
 			// if this node's branching factor is one
-			// less than we need, return it
+			// less than needed, return it
 			if (node.getChildrenCount() < B) {
 				return node;
-			}
-
-			for (INode child : node.getChildren()) {
-				if (child == null) {
-					break;
+			} else {
+				for (INode child : node.getChildren()) {
+					if (child == null) {
+						break;
+					} else {
+						if (B <= child.getChildrenCount())
+							q.add(child);
+						else
+							return child;
+					}
 				}
-				q.add(child);
 			}
 		}
 		return root;

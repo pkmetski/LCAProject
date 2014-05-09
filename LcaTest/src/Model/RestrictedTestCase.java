@@ -8,9 +8,8 @@ public class RestrictedTestCase extends TestCase {
 	private EulerTourController eulerTourController;
 	private RMQRestricted rmqRestricted;
 
-	public RestrictedTestCase(Tree tree, INode node1, INode node2,
-			boolean preprocessAlways) {
-		super(tree, node1, node2, preprocessAlways);
+	public RestrictedTestCase(Tree tree, boolean preprocessAlways) {
+		super(tree, preprocessAlways);
 		eulerTourController = new EulerTourController(tree);
 	}
 
@@ -23,9 +22,9 @@ public class RestrictedTestCase extends TestCase {
 		stopStopwatch();
 	}
 
-	public void executeQuery() {
+	public void executeQuery(INode node1, INode node2) {
 		startStopwatch();
-		rmqRestricted.RMQ(this.node1, this.node2);
+		rmqRestricted.RMQ(node1, node2);
 		stopStopwatch();
 	}
 

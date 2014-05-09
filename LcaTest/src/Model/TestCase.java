@@ -5,15 +5,11 @@ public abstract class TestCase {
 
 	private Stopwatch stopwatch = new Stopwatch();
 	protected Tree tree;
-	protected INode node1, node2;
 	protected double elapsedTime = 0;
 	protected boolean preprocessAlways;
 
-	public TestCase(Tree tree, INode node1, INode node2,
-			boolean preprocessAlways) {
+	public TestCase(Tree tree, boolean preprocessAlways) {
 		this.tree = tree;
-		this.node1 = node1;
-		this.node2 = node2;
 		this.preprocessAlways = preprocessAlways;
 	}
 
@@ -30,7 +26,7 @@ public abstract class TestCase {
 	}
 
 	public String getTestCaseName() {
-		return String.format("%s N: %s; B: %s; D: %s; Single Runs: %s",
+		return String.format("%s N:%s; B:%s; D:%s; Single Runs: %s",
 				getAlgorithmName(), tree.getN(), tree.getB(), tree.getD(),
 				preprocessAlways);
 	}
@@ -41,7 +37,7 @@ public abstract class TestCase {
 
 	public abstract void preprocess();
 
-	public abstract void executeQuery();
+	public abstract void executeQuery(INode node1, INode node2);
 
 	protected abstract String getAlgorithmName();
 }

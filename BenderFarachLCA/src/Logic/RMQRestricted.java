@@ -25,7 +25,8 @@ public class RMQRestricted {
 	}
 
 	public void preprocess() {
-		blockSize = (int) (Math.ceil((Math.log(L.length) / Math.log(2))) / 2);
+		blockSize = (int) Math.ceil((Math.ceil((Math.log(L.length) / Math
+				.log(2))) / 2));
 		int blocksCount = (int) Math.ceil(L.length / (double) blockSize);
 		Ap = new int[blocksCount];
 		B = new int[blocksCount];
@@ -33,8 +34,8 @@ public class RMQRestricted {
 		blocksRmq = new int[blocksCount][blockSize][blockSize];
 		Lp = new int[L.length];
 
-		M = new int[Ap.length][(int) Math.round((Math.log(Ap.length) / Math
-				.log(2)))];
+		M = new int[Ap.length + 1][(int) Math.round((Math.log(Ap.length) / Math
+				.log(2))) + 1];
 
 		populateAPrime(L, Ap, B, blockSize);
 		preprocessAPrime(Ap, M);
@@ -59,7 +60,6 @@ public class RMQRestricted {
 	private void preprocessAPrime(int[] Ap, int[][] M) {
 
 		// preprocess A' with ST algorithm
-
 		for (int i = 0; i < Ap.length; i++)
 			M[i][0] = i;
 
@@ -100,7 +100,7 @@ public class RMQRestricted {
 		// keeps a collection of blocks, where first dimension specifies the
 		// block signature, the second - the start index of each block in L
 		int[][] uniqueBlocks = new int[(int) (Math.ceil(Math.sqrt(A.length)))][(int) (Math
-				.ceil(Math.sqrt(A.length)) + 1)];
+				.ceil(Math.sqrt(A.length)))];
 
 		char[] binaryKey = new char[blockSize];
 
@@ -111,6 +111,7 @@ public class RMQRestricted {
 				// key, otherwise, add 0
 				// (values of L should be 1
 				// or -1 only)
+
 				binaryKey[k++] = A[j] == 1 ? '1' : '0';
 			}
 
@@ -119,19 +120,20 @@ public class RMQRestricted {
 			int key = Integer.parseInt(new String(binaryKey), blockSize);
 
 			// in the array, corresponding to this key
-			// add the start index of this block and increase the block counter
-			uniqueBlocks[key][++uniqueBlocks[key][0]] = i;
-
+			// add the start index of this block and increase the block
+			// counter
+			if (uniqueBlocks[key][0] + 1 < uniqueBlocks[key].length)
+				uniqueBlocks[key][++uniqueBlocks[key][0]] = i;
+			else
+				continue;
 			// if this is the first block with this key,
 			// its rmqs need to be preprocessed
 			if (uniqueBlocks[key][0] == 1) {
-
 				blocksRmq[uniqueBlocks[key][1] / blockSize] = preprocessInBlockQueries(
 						A, uniqueBlocks[key][1], blockSize);
 			}
 			// we have already computed the queries for this block type
 			else if (1 < uniqueBlocks[key][0]) {
-
 				blocksRmq[uniqueBlocks[key][uniqueBlocks[key][0]] / blockSize] = blocksRmq[uniqueBlocks[key][1]
 						/ blockSize];
 			}
@@ -226,18 +228,25 @@ public class RMQRestricted {
 	}
 
 	private int getMinBlocks(int i, int j, int blockSize) {
-
 		i /= blockSize;
 		j /= blockSize;
-		if (j < i) {
+		if (j <= i) {
 			return -1;
 		}
-		int k = (int) ((Math.log(j - i)) / Math.log(2));
 
-		if (Ap[M[i][k]] <= Ap[M[j - (1 << k) + 1][k]]) {
-			return B[M[i][k]];
-		} else {
-			return B[M[j - (1 << k) + 1][k]];
+		int k = (int) ((Math.log(j - i)) / Math.log(2));
+		try {
+			if (Ap[M[i][k]] <= Ap[M[j - (1 << k) + 1][k]]) {
+				return B[M[i][k]];
+			} else {
+				return B[M[j - (1 << k) + 1][k]];
+			}
+		} catch (Exception ex) {
+			System.out
+					.println(String
+							.format("Ap Length:%s; K:%s; i:%s; j:%s; M.length:%s; M[0].length:%s",
+									Ap.length, k, i, j, M.length, M[0].length));
+			return 0;
 		}
 	}
 }

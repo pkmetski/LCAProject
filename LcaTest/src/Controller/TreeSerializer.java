@@ -19,9 +19,17 @@ public class TreeSerializer {
 	public static void serialize(Tree tree) throws IOException {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		ObjectOutputStream o = new ObjectOutputStream(b);
-		o.writeObject(tree);
-		String filename = getFilename(tree.getN(), tree.getB(), tree.getD());
-		saveToFile(b.toByteArray(), filename);
+		try {
+			o.writeObject(tree);
+			String filename = getFilename(tree.getN(), tree.getB(), tree.getD());
+			saveToFile(b.toByteArray(), filename);
+			o.flush();
+			o.close();
+			b.flush();
+			b.close();
+		} catch (StackOverflowError ex) {
+			return;
+		}
 	}
 
 	public static Tree deserialize(int N, int B, int D) throws IOException,
@@ -34,7 +42,10 @@ public class TreeSerializer {
 		}
 		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
 		ObjectInputStream o = new ObjectInputStream(b);
-		return (Tree) o.readObject();
+		Tree tree = (Tree) o.readObject();
+		o.close();
+		b.close();
+		return tree;
 	}
 
 	private static void saveToFile(byte[] data, String filename)
@@ -46,7 +57,6 @@ public class TreeSerializer {
 
 	private static byte[] loadFromFile(String filename) throws IOException {
 		Path p = FileSystems.getDefault().getPath(DIR, filename);
-
 		return Files.readAllBytes(p);
 	}
 

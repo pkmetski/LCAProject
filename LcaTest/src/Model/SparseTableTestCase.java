@@ -8,9 +8,8 @@ public class SparseTableTestCase extends TestCase {
 	private EulerTourController eulerTourController;
 	private RMQSt rmqSparseTable;
 
-	public SparseTableTestCase(Tree tree, INode node1, INode node2,
-			boolean preprocessAlways) {
-		super(tree, node1, node2, preprocessAlways);
+	public SparseTableTestCase(Tree tree, boolean preprocessAlways) {
+		super(tree, preprocessAlways);
 		eulerTourController = new EulerTourController(tree);
 	}
 
@@ -23,9 +22,9 @@ public class SparseTableTestCase extends TestCase {
 		stopStopwatch();
 	}
 
-	public void executeQuery() {
+	public void executeQuery(INode node1, INode node2) {
 		startStopwatch();
-		rmqSparseTable.RMQ(this.node1, this.node2);
+		rmqSparseTable.RMQ(node1, node2);
 		stopStopwatch();
 	}
 

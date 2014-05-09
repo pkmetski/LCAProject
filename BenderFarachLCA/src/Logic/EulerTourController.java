@@ -11,7 +11,6 @@ public class EulerTourController {
 	private INode[] E;// nodes visited in euler tour order
 	private int[] L;// node level
 	private Map<INode, Integer> R;// representative of node
-	private int nodeIndex = -1;
 	private int level = -1;
 	private Tree tree;
 
@@ -23,10 +22,11 @@ public class EulerTourController {
 	}
 
 	public void preprocess() {
-		eulerTour(tree.getRoot());
+		int nodeIndex = -1;
+		eulerTour(tree.getRoot(), nodeIndex);
 	}
 
-	private void eulerTour(INode parent) {
+	private void eulerTour(INode parent, int nodeIndex) {
 		L[++nodeIndex] = ++level;
 		E[nodeIndex] = parent;
 
@@ -35,7 +35,10 @@ public class EulerTourController {
 		}
 
 		for (INode child : parent.getChildren()) {
-			eulerTour(child);
+			if (child == null) {
+				break;
+			}
+			eulerTour(child, nodeIndex);
 			L[++nodeIndex] = --level;
 			E[nodeIndex] = parent;
 		}

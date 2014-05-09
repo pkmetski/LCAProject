@@ -1,11 +1,11 @@
 package Model;
 
-public interface INode{
+public interface INode {
 
 	int getLabel();
 
 	INode[] getChildren();
-	
+
 	int getChildrenCount();
 
 	void addChild(INode child);

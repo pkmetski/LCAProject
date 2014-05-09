@@ -6,9 +6,8 @@ public class NaiveTestCase extends TestCase {
 
 	private LCANaive naiveAlgorithm;
 
-	public NaiveTestCase(Tree tree, INode node1, INode node2,
-			boolean preprocessAlways) {
-		super(tree, node1, node2, preprocessAlways);
+	public NaiveTestCase(Tree tree, boolean preprocessAlways) {
+		super(tree, preprocessAlways);
 
 		naiveAlgorithm = new LCANaive(tree);
 	}
@@ -17,9 +16,9 @@ public class NaiveTestCase extends TestCase {
 		// do nothing, naive doesn't preprocess
 	}
 
-	public void executeQuery() {
+	public void executeQuery(INode node1, INode node2) {
 		startStopwatch();
-		naiveAlgorithm.LCA(this.node1, this.node2);
+		naiveAlgorithm.LCA(node1, node2);
 		stopStopwatch();
 	}
 
